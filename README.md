@@ -1,2 +1,3 @@
 # Spark
-В данном проекте приведены практические примеры по работе с фреймворком Apache Spark
+
+This repo contains various examples of using PySpark
