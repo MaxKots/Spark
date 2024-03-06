@@ -1,5 +1,7 @@
 # Spark
 
-This repo contains various examples of using PySpark
+This repo contains various [examples](MaxKots/Spark) of using PySpark/
 
-<Title>First of all you need to set up your spark config<Title>
+[Here](https://spark.apache.org/docs/latest/api/python/reference/index.html) you can find all necessary documentation.
+
+<b>First of all you need to set up your spark config</b>
