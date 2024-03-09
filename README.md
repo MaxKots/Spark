@@ -23,11 +23,19 @@ Apache Spark is an open-source multi-language Big Data framework for distributed
 </p>
 
 ### Spark session
-First of all you need to set up your spark session with most important config options. We will use Jupyter to work with PySpark.
+First of all you need to set up your Spark session with most important config options. We will use Jupyter to work with PySpark.
 
-On some clusters your Spark session starts automatically with defailt parameters. You can start default Spark session with command:
+On some clusters your Spark session configure starts automatically with defailt parameters. You can start default Spark session using Spark Python API with command:
 ```
-from pyspark import SparkConf
 from pyspark.sql import SparkSession
 spark = SparkSession.builder.getOrCreate()
+```
+To get SparkSession parameters run the following:
+```
+spark.sparkContext.getConf().getAll()
+```
+
+Here is my own Spark config, use it at your own discretion, but take into consideration your cluster resources, it`s better not no exceed them.
+```
+Code
 ```
