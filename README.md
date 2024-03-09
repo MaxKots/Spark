@@ -36,6 +36,41 @@ spark.sparkContext.getConf().getAll()
 ```
 
 Here is my own Spark config, use it at your own discretion, but take into consideration your cluster resources, it`s better not no exceed them.
+I'll add a few more points soon
 ```
-Code
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as f
+from pyspark import SparkConf
+
+SPARK_CONFIG = [
+ ('spark.driver.maxResultSize', '4g'), # не более 80% от памяти.
+ ('spark.driver.memory', '4g'),
+ ('spark.executor.memory', '32g'), #may change to 64g
+ ('spark.executor.memoryOverhead', '4g'),
+ ('spark.driver.memoryOverhead', '4g'),
+ ('spark.executor.insatances', '5'),
+ ('spark.executor.cores', '5'),
+ ('spark.driver.cores', '5'),
+ ('spark.cores.max', '15'),
+ ('spark.dynamicAllocation.enabled', 'false'),
+ ('spark.sql.codegen', 'false'),
+ ('spark.sql.inMemoryColumnarStorage.compressed', 'false'),
+ ('spark.sql.inMemoryColumnarStorage.batchsize', '1000' ),
+ ('spark.sql.parquet.compression.codec', 'snappy'),
+ ('spark.sql.broadcastTimeout', 360),
+ ('park.sqL.execution.arrow.pyspark.enabled', 'true'),
+ ('spark.bebug.maxToStringFields', '200'),
+ ('spark.sql.parquet.binaryAsString', 'true'),
+ ('spark.sql.parquet.int96TimestampConversion', 'true'),
+ ('spark.sql.parquet.WriteLegacyFormat', 'true'),
+ ('spark.serializer', 'org.apache.spark.serializer.KryoSerializer'),
+ ('spark.kryoserializer.buffer', '24m'),
+ ('spark.kryoserializer.buffer.max', '48m'),
+ ('spark.sparkContext.setLogLevel', 'FATAL'),
+ ('spark.sql.shuffle.partitions', '350'),
+ ('spark.default.parallelism', '350')
+] 
+
+conf = SparkConf().setAll(SPARK_CONFIG)
+spark = SparkSession.builder.config(conf = conf).getOrCreate()
 ```
