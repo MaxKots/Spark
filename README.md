@@ -1,6 +1,6 @@
 # Spark
 
-This repo contains various [examples](MaxKots/Spark) of using Spark on python.
+This repo contains various [examples](./examples.ipynb) of using Spark on python.
 
 Apache Spark is an open-source multi-language Big Data framework for distributed batch and stream processing calculations on single-node machines or clusters.
 
