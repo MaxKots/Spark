@@ -43,33 +43,57 @@ from pyspark.sql import functions as f
 from pyspark import SparkConf
 
 SPARK_CONFIG = [
- ('spark.driver.maxResultSize', '4g'), # не более 80% от памяти.
- ('spark.driver.memory', '4g'),
- ('spark.executor.memory', '32g'), #may change to 64g
- ('spark.executor.memoryOverhead', '4g'),
- ('spark.driver.memoryOverhead', '4g'),
- ('spark.executor.insatances', '5'),
- ('spark.executor.cores', '5'),
- ('spark.driver.cores', '5'),
- ('spark.cores.max', '15'),
- ('spark.dynamicAllocation.enabled', 'false'),
- ('spark.sql.codegen', 'false'),
- ('spark.sql.inMemoryColumnarStorage.compressed', 'false'),
- ('spark.sql.inMemoryColumnarStorage.batchsize', '1000' ),
- ('spark.sql.parquet.compression.codec', 'snappy'),
- ('spark.sql.broadcastTimeout', 360),
- ('park.sqL.execution.arrow.pyspark.enabled', 'true'),
- ('spark.bebug.maxToStringFields', '200'),
- ('spark.sql.parquet.binaryAsString', 'true'),
- ('spark.sql.parquet.int96TimestampConversion', 'true'),
- ('spark.sql.parquet.WriteLegacyFormat', 'true'),
- ('spark.serializer', 'org.apache.spark.serializer.KryoSerializer'),
- ('spark.kryoserializer.buffer', '24m'),
- ('spark.kryoserializer.buffer.max', '48m'),
- ('spark.sparkContext.setLogLevel', 'FATAL'),
- ('spark.sql.shuffle.partitions', '350'),
- ('spark.default.parallelism', '350')
-] 
+    ('spark.driver.maxResultSize', '4g'),  # Должно быть не более 80% от памяти
+    ('spark.driver.memory', '4g'), # Память на драйверах
+    ('spark.executor.memory', '60g'), # Память на исполнителях
+    ('spark.executor.memoryOverhead', '4g'), # Параметр допустимого переполнения памяти
+    ('spark.driver.memoryOverhead', '4g'),
+    # Если включаешь динамическое добавление ресурсов, то отключи параметр ниже
+    ('spark.executor.insatances', '5'), #Было 5. Кол-во исполнителей, стоит учитывать, что драйвер и память будут выделены на инст!!!
+    ('spark.executor.cores', '5'), #Было 8. Рекомендовано - 2, обычно ставят 5. Больше ядер - меньше исполнителей, меньше операций ввода-выводла и параллелизма
+    ('spark.driver.cores', '5'), #Было 8. Рекомендовано - 2, обычно ставят 5. Больше ядер - меньше исполнителей, меньше операций ввода-выводла и параллелизма
+    ('spark.cores.max', '15'), #Было 16, если ставим число не кратное  кол-ву исполнителей, получим висящие ядра, не участвующие в рабте
+    ('spark.dynamicAllocation.enabled', 'false'), #Включить динамическое выделение ресурсов
+    # ('spark.dynamicAllocation.minExecutors', '0'), #Дефолт - 1,то есть исполнители будут подключены автоматически при необходимости
+    # ('spark.dynamicAllocation.maxExecutors', '24'), #Динамическое распределение исполнителей
+    # ('spark.dynamicAllocation.executorIdleTimeout', '600s'), #Отключить исполнитель при простое более N-секунд (дефолт - 300)
+    # ('spark.dynamicAllocation.cachedExecutorIdleTimeout', '600s'),    #Отключить исполнитель с кэшированными данными при простое более N-секунд, так как кэш будет храниться до падения сессии(дефолт - infinity)
+    ('spark.sql.adaptive.enabled', 'True'),
+    ('spark.sql.adaptive.forceApply', 'False'),
+    ('spark.sql.adaptive.logLevel', 'info'),
+    ('spark.sql.adaptive.advisoryPartitionSizeInBytes', '256m'),
+    ('spark.sql.adaptive.coalescePartitions.enabled', 'True'),
+    ('spark.sql.adaptive.coalescePartitions.minPartitionNum', '1'),
+    ('spark.sql.adaptive.coalescePartitions.initialPartitionNum', '8192'),
+    ('spark.sql.adaptive.fetchShuffleBlocksInBatch', 'True'),
+    ('spark.sql.adaptive.localShuffleReader.enabled', 'True'),
+    ('spark.sql.adaptive.skewJoin.enabled', 'True'),
+    ('spark.sql.adaptive.skewJoin.skewedPartitionFactor', '5'),
+    ('spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes', '400m'),
+    ('spark.sql.adaptive.nonEmptyPartitionRatioForBroadcastJoin', '0.2'),
+    ('spark.sql.autoBroadcastJoinThreshold', '-1'),
+    ('spark.sql.optimizer.dynamicPartitionPrunning.enabled', 'True'),
+    ('spark.sql.cbo.enabled', 'True'),
+    ('spark.sql.execution.arrow.pyspark.enabled', 'True'),
+    ('spark.scheduler.mode', 'FAIR'),
+    ('spark.sql.codegen', 'false'), #Компилирует каждый запрос в байт-код Java на лету
+    ('spark.sql.inMemoryColumnarStorage.compressed', 'False'), #Автоматическое сжатие табличного хранилища в памяти
+    ('spark.sql.inMemoryColumnarStorage.batchsize', '1000'), #Размер пакета кэширования. Слишком большие значения приводят к ошибкам исчерпания памяти
+    ('spark.sql.parquet.compression.codec', 'snappy'), #Используемый кодек сжатия (uncompressed, snappy, gzip, lzo)
+    ('spark.sql.broadcastTimeout', 360), #5 минут таймаут ожидания трансляции данных (полезно, если broadcast готов не с самого начала работы запроса, а позднее)
+    # ('park.sql.execution.arrow.pyspark.enabled', 'true'),
+    #('spark.sql.session.timeZone', 'UTC+3'), #Устанавливаем локальный часовой пояс
+    ('spark.bebug.maxToStringFields', '200'), #Максиммальное кол-во записей в строке дебага, все выходящее за кол-во будет скрыто
+    ('spark.sql.parquet.binaryAsString', 'True'),
+    ('spark.sql.parquet.int96TimestampConversion', 'True'),
+    ('spark.sql.parquet.WriteLegacyFormat', 'True'),
+    ('spark.serializer', 'org.apache.spark.serializer.KryoSerializer'), #на всякий случай объявляем Kryo как механизм сериализации
+    ('spark.kryoserializer.buffer', '24m'),
+    ('spark.kryoserializer.buffer.max', '48m'), 
+    ('spark.sparkContext.setLogLevel', 'OFF'), #- сократить размер логов с варнингами (ERROR\WARN)
+    ('spark.sql.shuffle.partitions', '350'), # - Кол-во партиций для DataSet и DataFrame
+    ('spark.default.parallelism', '350') # - Кол-во партиций для join и reduceByKey для RDD 
+]
 
 conf = SparkConf().setAll(SPARK_CONFIG)
 spark = SparkSession.builder.config(conf = conf).getOrCreate()
