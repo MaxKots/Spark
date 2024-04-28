@@ -46,10 +46,10 @@ SPARK_CONFIG = [
     ('spark.driver.maxResultSize', '4g'),  # Должно быть не более 80% от памяти
     ('spark.driver.memory', '4g'), # Память на драйверах
     ('spark.executor.memory', '60g'), # Память на исполнителях
-    ('spark.executor.memoryOverhead', '4g'), # Параметр допустимого переполнения памяти
-    ('spark.driver.memoryOverhead', '4g'),
+    ('spark.executor.memoryOverhead', '4g'), # Параметр допустимого переполнения памяти исполнителя
+    ('spark.driver.memoryOverhead', '4g'), # Параметр допустимого переполнения памяти драйвера
     # Если включаешь динамическое добавление ресурсов, то отключи параметр ниже
-    ('spark.executor.insatances', '5'), #Было 5. Кол-во исполнителей, стоит учитывать, что драйвер и память будут выделены на инст!!!
+    ('spark.executor.insatances', '5'), # Кол-во исполнителей, стоит учитывать, что драйвер и память будут выделены на инстант
     ('spark.executor.cores', '5'), #Было 8. Рекомендовано - 2, обычно ставят 5. Больше ядер - меньше исполнителей, меньше операций ввода-выводла и параллелизма
     ('spark.driver.cores', '5'), #Было 8. Рекомендовано - 2, обычно ставят 5. Больше ядер - меньше исполнителей, меньше операций ввода-выводла и параллелизма
     ('spark.cores.max', '15'), #Было 16, если ставим число не кратное  кол-ву исполнителей, получим висящие ядра, не участвующие в рабте
@@ -57,7 +57,7 @@ SPARK_CONFIG = [
     # ('spark.dynamicAllocation.minExecutors', '0'), #Дефолт - 1,то есть исполнители будут подключены автоматически при необходимости
     # ('spark.dynamicAllocation.maxExecutors', '24'), #Динамическое распределение исполнителей
     # ('spark.dynamicAllocation.executorIdleTimeout', '600s'), #Отключить исполнитель при простое более N-секунд (дефолт - 300)
-    # ('spark.dynamicAllocation.cachedExecutorIdleTimeout', '600s'),    #Отключить исполнитель с кэшированными данными при простое более N-секунд, так как кэш будет храниться до падения сессии(дефолт - infinity)
+    # ('spark.dynamicAllocation.cachedExecutorIdleTimeout', '600s'), #Отключить исполнитель с кэшем при простое более N-секунд (кэш храниться до падения сессии(дефолт - infinity))
     ('spark.sql.adaptive.enabled', 'True'),
     ('spark.sql.adaptive.forceApply', 'False'),
     ('spark.sql.adaptive.logLevel', 'info'),
@@ -73,16 +73,15 @@ SPARK_CONFIG = [
     ('spark.sql.adaptive.nonEmptyPartitionRatioForBroadcastJoin', '0.2'),
     ('spark.sql.autoBroadcastJoinThreshold', '-1'),
     ('spark.sql.optimizer.dynamicPartitionPrunning.enabled', 'True'),
-    ('spark.sql.cbo.enabled', 'True'),
-    ('spark.sql.execution.arrow.pyspark.enabled', 'True'),
-    ('spark.scheduler.mode', 'FAIR'),
+    ('spark.sql.cbo.enabled', 'True'), # Включить Cost-based optimisation в Catalyst 
+    ('spark.scheduler.mode', 'FAIR'), # Наиболее оптимальный алгоритм шедулера. Включать только в том случае, если он настроен
     ('spark.sql.codegen', 'false'), #Компилирует каждый запрос в байт-код Java на лету
     ('spark.sql.inMemoryColumnarStorage.compressed', 'False'), #Автоматическое сжатие табличного хранилища в памяти
     ('spark.sql.inMemoryColumnarStorage.batchsize', '1000'), #Размер пакета кэширования. Слишком большие значения приводят к ошибкам исчерпания памяти
     ('spark.sql.parquet.compression.codec', 'snappy'), #Используемый кодек сжатия (uncompressed, snappy, gzip, lzo)
     ('spark.sql.broadcastTimeout', 360), #5 минут таймаут ожидания трансляции данных (полезно, если broadcast готов не с самого начала работы запроса, а позднее)
-    # ('park.sql.execution.arrow.pyspark.enabled', 'true'),
-    #('spark.sql.session.timeZone', 'UTC+3'), #Устанавливаем локальный часовой пояс
+    ('spark.sql.execution.arrow.enabled', 'true'), # Для эффективного преобразования датафрейма Spark в Pandas
+    # ('spark.sql.session.timeZone', 'UTC+3'), #Устанавливаем локальный часовой пояс. Может быть конфликт с данными в Hive
     ('spark.bebug.maxToStringFields', '200'), #Максиммальное кол-во записей в строке дебага, все выходящее за кол-во будет скрыто
     ('spark.sql.parquet.binaryAsString', 'True'),
     ('spark.sql.parquet.int96TimestampConversion', 'True'),
